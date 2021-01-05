@@ -1,0 +1,8 @@
+output
+PATH: /mnt/c/Users/nickn/Desktop/backupprogram/...
+NAME: ZeeBaCkUp
+
+input
+directory
+directory
+directory
