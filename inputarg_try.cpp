@@ -22,7 +22,7 @@ std::string create_initial_JSON(std::string input_txt)
 {
     char inout = 0b000; 
     std::string importantJSON;
-    std::string importantJSON_direc;
+    std::string importantJSON_direc = NULL;
 
     ifstream txt_file(input_txt);
 
@@ -45,16 +45,44 @@ std::string create_initial_JSON(std::string input_txt)
                 {
                     if(current_line.find("...") != std::string::npos)
                     {
-                        std::size_t pos = (current_line.find("...") + 2);
-                        importantJSON_direc = current_line.substr(5,pos);
+                        int pos2 = (current_line.find("..."))-5;
+                        
+                        importantJSON_direc = current_line.substr(5,pos2);
 
                         std::cout << importantJSON_direc << "\n";
 
-                        if(!fs::exists(importantJSON_direc)) std::cout << "It not dere\n";
-                        else std::cout << "it dere\n";
+                        if(!fs::exists(importantJSON_direc)) 
+                        {
+                            std::cout << "It not dere\n";
+                            fs::create_directories(importantJSON_direc); // I could make this in C but it would need to be a seperate file
+                        
+                            // if system cannot create the directories then exit
+                        }
+
+                        fs::current_path(importantJSON_direc);
+                        
+                        // if system cannot access current path then provide an error and exit
                     }
                 }
                 
+                if(current_line.find("NAME:") != std::string::npos)
+                {
+                    if(fs::current_path() == importantJSON_direc)
+                    {
+                        // need to check for those 
+                        //while (pch!=NULL)
+                        //{
+                        //    printf ("found at %d\n",pch-str+1);
+                        //    pch=strchr(pch+1,'s');
+                        //}
+                        //
+
+                        fs::create_directory("::::                   "); //directory name cant have \ / * : ? " < > |
+                    }
+
+                    //else there should be an error....
+                }
+
                 break;
             }
         }
