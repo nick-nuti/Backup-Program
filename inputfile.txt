@@ -1,5 +1,6 @@
 output
-/mnt/c/Users/nickn/Desktop/backupprogram/soppa/soopa/singa/blima/ZeeBaCkUp/bb...
+PATH:/mnt/c/Users/nickn/Desktop/backupprogram/soppa/soopa/singa/blima/ZeeBaCkUp/bb...
+NAME:zeebackup
 
 input
 directory
