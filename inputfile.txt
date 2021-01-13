@@ -1,8 +1,9 @@
+
+
 output
 PATH:/mnt/c/Users/nickn/Desktop/backupprogram/soppa/soopa/singa/blima/ZeeBaCkUp/bb...
 NAME:zeebackup
 
 input
-directory
-directory
-directory
+/mnt/c/Program Files (x86)/Minecraft Launcher
+/mnt/c/Battlestate Games

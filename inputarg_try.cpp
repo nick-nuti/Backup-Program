@@ -25,7 +25,7 @@ std::string current_time_date()
     time_t timey = time(0);
     tm* timestruct = localtime(&timey);
     
-    time_date= ('_') + std::to_string(1900 + timestruct->tm_year)+('_')+std::to_string(1 + timestruct->tm_mon)+("__")+std::to_string(timestruct->tm_mday)+('_')+std::to_string(timestruct->tm_hour)+('_')+std::to_string(timestruct->tm_min)+('_')+std::to_string(timestruct->tm_sec);
+    time_date= ('_') + std::to_string(1900 + timestruct->tm_year)+('_')+std::to_string(1 + timestruct->tm_mon)+('_')+std::to_string(timestruct->tm_mday)+("__")+std::to_string(timestruct->tm_hour)+('_')+std::to_string(timestruct->tm_min)+('_')+std::to_string(timestruct->tm_sec);
     std::cout << time_date << "\n";
     return time_date;
 }
@@ -80,12 +80,26 @@ std::string illegalcharcheck(std::string stringtocheck, bool ispath)
     return checkedpath;
 }
 
+void space_avaliable(std::string inputpath, uintmax_t space);
+{
+    for(int path_index=inputpath.length()-1; path_index>=0; --ws_index)
+    {
+        // i guess use regexs
+    }
+
+    fs::space_info dev_space = fs::space("/mnt/c");
+    std::cout << "Space available for current path = " << dev_space.free << "\n";
+
+}
+
 void create_initial_JSON(std::string input_txt, std::string importantJSON, std::string importantJSON_direc)
 {
     char inout = 0b000;
+    char case_index = 0b000;
     char output_info = 0; 
-    //std::string importantJSON;
-    //std::string importantJSON_direc;
+
+    uintmax_t space_available;
+
     std::string datetime = current_time_date();
 
     std::cout << datetime << "\n";
@@ -96,16 +110,44 @@ void create_initial_JSON(std::string input_txt, std::string importantJSON, std::
     {
         std::cout << current_line << "\n";
 
-        switch(inout)
+        if(current_line.empty()) continue;
+
+        std::cout << "currentline = " << current_line << "\n";
+
+        switch(case_index)
         {
-            case 0: 
+            case 0:
             {
-                if(current_line.find("output") != std::string::npos) inout = 0b001;
+                std::cout << "case_index = 0" << "\n";
+
+                if((current_line.find("output") != std::string::npos) && ((inout & 0b001) == 0))
+                {
+                    inout = inout | 0b001;
+                    case_index = 0b001;
+                }
+
+                else if((current_line.find("input") != std::string::npos) && ((inout & 0b010) == 0))
+                {
+                    if((inout & 0b001) == 1)
+                    {
+                        inout = inout | 0b010;
+                        case_index = 0b010;
+                    }
+
+                    // else raise an error... we need the output path first to check the space required at the output
+                }
+
+                else if(inout == 0b111) case_index = 0b011;
+
+                // else there should be an error
+                
                 break;
             }
 
             case 1:
             { 
+                std::cout << "case_index = 1" << "\n";
+
                 if(current_line.find("PATH:") != std::string::npos)
                 {
                     if(current_line.find("...") != std::string::npos)
@@ -114,53 +156,66 @@ void create_initial_JSON(std::string input_txt, std::string importantJSON, std::
 
                         importantJSON_direc.append(datetime);
                         std::cout << importantJSON_direc << "\n";
-
-                        if(!fs::exists(importantJSON_direc)) 
-                        {
-                            std::cout << "It not dere\n";
-                            fs::create_directories(importantJSON_direc); // I could make this in C but it would need to be a seperate file
-
-                            // if system cannot create the directories then provide an error and exit
-                                // important*** do not need to check for illegal characters due to the fact that if the dirs cant be created then an error will result
-                        }
-
-                        fs::current_path(importantJSON_direc);
-                        std::cout << "Current path = " << fs::current_path() << "\n";
-                        
-                        // if system cannot access current path then provide an error and exit
-                        output_info = 1;
                     }
 
-                    // else the file is improperly formatted raise an error
-
-                    
+                    // else the file is improperly formatted raise an error 
                 }
 
-                else if((current_line.find("NAME:") != std::string::npos)&&(output_info == 1))
+                else if(current_line.find("NAME:") != std::string::npos)
                 {
                     std::cout << "File name = " << current_line << "\n";
                     importantJSON = illegalcharcheck(current_line, false);
 
                     importantJSON.append(datetime);
-                    importantJSON.append(".json");
-                    std::ofstream JSONFILE(importantJSON);
-                    inout = 0b010;
                 }
 
                 // else the file is improperly formatted raise an error
 
+                if(!(importantJSON.empty()) && !(importantJSON_direc.empty())) case_index = 0b000;
+
                 break;
             }
 
-            case 2:
+            case 2: // space check
             {
-                if(current_line.find("input") != std::string::npos) inout = 0b011;
+                std::cout << "case_index = 2" << "\n";
+
+                space_avaliable(importantJSON_direc, space_available);
+
+                err_num(1);
+                //space_requirement_acc();
+
+                //accumulate the space required for storing the input stuff.... check the space required with the space available
+                // aka have a while loop adding up all of the space required (int should be plenty)
                 break;
             }
 
             case 3:
             {
+                std::cout << "case_index = 3" << "\n";
+    
+                if(!fs::exists(importantJSON_direc)) 
+                {
+                    std::cout << "It not dere\n";
+                    fs::create_directories(importantJSON_direc); // I could make this in C but it would need to be a seperate file
 
+                    // if system cannot create the directories then provide an error and exit
+                        // important*** do not need to check for illegal characters due to the fact that if the dirs cant be created then an error will result
+                }
+
+                fs::current_path(importantJSON_direc);
+                std::cout << "Current path = " << fs::current_path() << "\n";       
+                // if system cannot access current path then provide an error and exit
+
+                fs::create_directory(importantJSON);
+                importantJSON.append(".json");
+                std::ofstream JSONFILE(importantJSON);
+
+                // run through each string to eliminate beginning white space
+                // see if string exists, if it doesn't then write an error to cout + write an error to the JSON
+                    // add nothing to input path for individual file or directory, add "..." for surface level directory, add "***" for a directory and you want specify individual files within the directory close it with a seperate line that has "***"
+                // if the path exists then create 
+                break;
             }
 
             default:
