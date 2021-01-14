@@ -80,16 +80,30 @@ std::string illegalcharcheck(std::string stringtocheck, bool ispath)
     return checkedpath;
 }
 
-void space_avaliable(std::string inputpath, uintmax_t space);
+// &space below is a pass by reference, this was required due to the fact that I didn't return anything....
+// but I modified the space function parameter and passed it back to main so the initial input to this function needs a
+// pass by reference to the original "space" value
+void space_avaliable(std::string inputpath, uintmax_t &space) 
 {
-    for(int path_index=inputpath.length()-1; path_index>=0; --ws_index)
+    std::string inputpath_substr;
+
+    for(int path_index=inputpath.length()-1; path_index>=0; --path_index)
     {
-        // i guess use regexs
+        // 47 should be "/"
+        if(inputpath[path_index] == 47) 
+        {
+            inputpath_substr = inputpath.substr(0,path_index);
+            std::cout << "inputpath_substr = " << inputpath_substr << endl;
+            if(fs::exists(inputpath_substr))
+            {
+                fs::space_info dev_space = fs::space(inputpath_substr);
+                //std::cout << "Space available for current path = " << dev_space.free << "\n";
+                space = dev_space.free;
+                std::cout << "Space available for current path = " << space << "\n";
+                break;
+            }
+        }
     }
-
-    fs::space_info dev_space = fs::space("/mnt/c");
-    std::cout << "Space available for current path = " << dev_space.free << "\n";
-
 }
 
 void create_initial_JSON(std::string input_txt, std::string importantJSON, std::string importantJSON_direc)
@@ -99,6 +113,7 @@ void create_initial_JSON(std::string input_txt, std::string importantJSON, std::
     char output_info = 0; 
 
     uintmax_t space_available;
+    uintmax_t space_required;
 
     std::string datetime = current_time_date();
 
@@ -137,7 +152,7 @@ void create_initial_JSON(std::string input_txt, std::string importantJSON, std::
                     // else raise an error... we need the output path first to check the space required at the output
                 }
 
-                else if(inout == 0b111) case_index = 0b011;
+                else if(inout == 0b111) case_index = 0b100;
 
                 // else there should be an error
                 
@@ -181,8 +196,10 @@ void create_initial_JSON(std::string input_txt, std::string importantJSON, std::
                 std::cout << "case_index = 2" << "\n";
 
                 space_avaliable(importantJSON_direc, space_available);
+                std::cout << "Second checck for space_avaiable output = " << space_available << "\n";
 
-                err_num(1);
+                case_index = 0b011;
+
                 //space_requirement_acc();
 
                 //accumulate the space required for storing the input stuff.... check the space required with the space available
@@ -191,6 +208,18 @@ void create_initial_JSON(std::string input_txt, std::string importantJSON, std::
             }
 
             case 3:
+            {
+                std::cout << "case_index = 2" << "\n";
+
+                // need to look for spaces before and spaces after
+                // need to look for the last path
+
+                err_num(1);
+
+                break;
+            }
+
+            case 4:
             {
                 std::cout << "case_index = 3" << "\n";
     
