@@ -1,14 +1,20 @@
 {
-    "output":
-    {
-    "path":"/mnt/c/Users/nickn/Desktop/backupprogram/soppa/soopa/singa/blima/ZeeBaCkUp/bb",
-    "name":"zeebackup"
+    "output": {
+        "path": "/mnt/c/Users/nickn/Desktop/backupprogram/soppa/soopa/singa/blima/ZeeBaCkUp/bb",
+        "name": "zeebackup"
     },
-
-    "input":
-    [
-        {"type":"fd","path":"/mnt/c/Users/nickn/Documents/Budget Cuts Save Data"},
-        {"type":"f","path":"/mnt/c/Users/nickn/Desktop/maoooooooo.PNG"},
-        {"type":"sd","path":"/mnt/c/Program Files (x86)/Minecraft Launcher"}
+    "input": [
+        {
+            "type": "fd",
+            "path": "/mnt/c/Users/nickn/Documents/Budget Cuts Save Data"
+        },
+        {
+            "type": "f",
+            "path": "/mnt/c/Users/nickn/Desktop/maoooooooo.PNG"
+        },
+        {
+            "type": "sd",
+            "path": "/mnt/c/Program Files (x86)/Minecraft Launcher"
+        }
     ]
 }

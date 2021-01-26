@@ -2,44 +2,71 @@
     "backupjson":
     [
         {
-            "type":"fulldirectory",
             "path":"/mnt/c/Users/nickn/Documents/Budget Cuts Save Data",
             "metadata":"",
             "datetime":"",
             "inside":
             [
-                {"name":"extraneous_file.txt","metadata":"","datetime":""},
-                {"name":"config_machine.cfg","metadata":"","datetime":""},
                 {
-                    "type":"fulldirectory",
+                    "path":"extraneous_file.txt",
+                    "metadata":"",
+                    "datetime":"",
+                    "inside":"0"
+                },
+                {
+                    "path":"config_machine.cfg",
+                    "metadata":"",
+                    "datetime":"",
+                    "inside":"0"
+                },
+                {
                     "path":"/3",
                     "metadata":"",
                     "datetime":"",
                     "inside":
                     [
-                        {"name":"profile.cfg","metadata":"","datetime":""},
-                        {"name":"progress.bcstats","metadata":"","datetime":""}
+                        {
+                            "path":"profile.cfg",
+                            "metadata":"",
+                            "datetime":"",
+                            "inside":"0"
+                        },
+                        {
+                            "path":"progress.bcstats",
+                            "metadata":"",
+                            "datetime":"",
+                            "inside":"0"
+                        }
                     ]
                 }
             ]
         },
 
         {
-            "type":"file",
             "path":"/mnt/c/Users/nickn/Desktop/maoooooooo.PNG",
             "metadata":"",
-            "datetime":""
+            "datetime":"",
+            "inside":"0"
         },
 
         {
-            "type":"partdirectory",
             "path":"/mnt/c/Program Files (x86)/Minecraft Launcher",
             "metadata":"",
             "datetime":"",
             "inside":
             [
-                {"name":"debug.log","metadata":"","datetime":""},
-                {"name":"MinecraftLauncher.exe","metadata":"","datetime":""}
+                {
+                    "path":"debug.log",
+                    "metadata":"",
+                    "datetime":"",
+                    "inside":"0"
+                },
+                {
+                    "path":"MinecraftLauncher.exe",                    
+                    "metadata":"",
+                    "datetime":"",
+                    "inside":"0"
+                }
             ]
         }
     ]

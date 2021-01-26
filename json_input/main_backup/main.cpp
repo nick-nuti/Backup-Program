@@ -9,8 +9,6 @@ using json = nlohmann::json;
 using namespace std;
 namespace fs = std::filesystem;
 
-std::string date_time;
-
 namespace json_cmd
 {
     struct infile_out_dir
@@ -40,9 +38,9 @@ namespace json_cmd
     struct outfile_data
     {
         std::string path;
-        std::string metadata; // I have no idea of how to get metadata....
+        std::string metadata;
         std::string datetime;
-        std::vector<json_cmd::outfile_data> inside;
+        std::vector<std::string> inside;
     };
 }
 
@@ -69,87 +67,14 @@ void space_avaliable(std::string inputpath, uintmax_t &space)
     }
 }
 
-std::string current_time_date()
+void space_required(std::string inputpath, uintmax_t &space)
 {
-    std::string time_date;
-
-    time_t timey = time(0);
-    tm* timestruct = localtime(&timey);
-    
-    time_date=std::to_string(1900 + timestruct->tm_year)+('_')+std::to_string(1 + timestruct->tm_mon)+('_')+std::to_string(timestruct->tm_mday)+("__")+std::to_string(timestruct->tm_hour)+('_')+std::to_string(timestruct->tm_min)+('_')+std::to_string(timestruct->tm_sec);
-    std::cout << time_date << "\n";
-    return time_date;
-}
-
-void JSON_substructure(json_cmd::outfile_data &sub_structure)
-{
-
-}
-
-json_cmd::outfile_data createJSON_structure(json_cmd::infile_in_data in_data)
-{
-    json_cmd::outfile_data out_data;
-
-    if(fs::exists(in_data.path))
-    {
-        out_data.path = in_data.path;
-        //out_data.metadata = ?
-        out_data.datetime = date_time;
-
-        if(fs::is_directory(in_data.path))
-        {
-            if(strcmp(in_data.type.c_str(),"fd")==0)
-            {
-                for(auto p: fs::recursive_directory_iterator(in_data.path))
-                {
-                    out_data.inside.push_back(json_cmd::outfile_data());
-
-                    if(fs::is_directory(in_data.path))
-                    {
-                        
-                    }
-
-                    else
-                    {
-                        
-                    }
-                    
-                    std::cout << p.path() << '\n';
-                }
-            }
-
-            else if(strcmp(in_data.type.c_str(),"sd")==0)
-            {
-                for(auto p: fs::directory_iterator(in_data.path))
-                {
-                    out_data.inside.push_back(json_cmd::outfile_data());
-
-                    std::cout << p.path() << '\n';
-                }
-            }
-        }
-
-        else
-        {
-            
-            std::cout << in_data.path << '\n';
-        }
-    
-        return out_data;
-    }
-
-    else
-    {
-        return -1; // problem?
-    }
 }
 
 int main(int argc, char **argv)
 {
     if (argc > 0)
     {
-        date_time = current_time_date();
-
         std::string originaljson = fs::absolute(argv[1]);
 
         std::ifstream inputjson(fs::absolute(argv[1]));
@@ -159,18 +84,14 @@ int main(int argc, char **argv)
 
         json_cmd::infile_out_dir infile_out_dir = jsonobject["output"].get<json_cmd::infile_out_dir>();
 
-        json_cmd::infile_in_data infile_in;
-        std::vector<json_cmd::outfile_data> JSON_structures;
+        std::vector<json_cmd::infile_in_data> infile_in;
         //Alternative to a linked list
-
         for(int index=0; index<jsonobject["input"].size(); ++index)
         {
-            infile_in = jsonobject["input"][index].get<json_cmd::infile_in_data>();
-            //std::cout << "infile_in[index] = " << infile_in[index].path << "\n";
-
-            JSON_structures.push_back(json_cmd::outfile_data());
-            JSON_structures[index] = createJSON_structure(infile_in);
+            infile_in.push_back(json_cmd::infile_in_data());
+            infile_in[index] = jsonobject["input"][index].get<json_cmd::infile_in_data>();
             //ref:https://stackoverflow.com/questions/8067338/vector-of-structs-initialization/8067443
+            std::cout << "infile_in[index] = " << infile_in[index] << "\n";
         }
 
         std::cout << "output_cls = " << infile_out_dir.path << "\n";
