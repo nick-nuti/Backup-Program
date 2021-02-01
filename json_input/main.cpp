@@ -42,7 +42,9 @@ namespace json_cmd
         std::string path;
         std::string metadata; // I have no idea of how to get metadata....
         std::string datetime;
+        uintmax_t filesize;
         std::vector<json_cmd::outfile_data> inside;
+
     };
 }
 
@@ -81,66 +83,112 @@ std::string current_time_date()
     return time_date;
 }
 
-void JSON_substructure(json_cmd::outfile_data &sub_structure)
+void JSON_substructure(std::string dir_path, json_cmd::outfile_data *sub_structure, bool recursive, uintmax_t &dir_size_acc)
 {
+    json_cmd::outfile_data struct_holder;
+    uintmax_t dir_size = dir_size_acc;
+    std::cout << "SPACE REQUIRED= " << dir_size_acc << "\n";
 
+    if(recursive == true)
+    {
+
+        for(auto pathy: fs::directory_iterator(dir_path))
+        {
+            if(fs::is_directory(pathy))
+            {
+                //std::cout << std::string(pathy.path()) << "\n";
+                struct_holder = (json_cmd::outfile_data){.path = pathy.path()};
+
+                JSON_substructure(std::string(pathy.path()), &struct_holder, true, dir_size);
+
+                sub_structure->inside.push_back(struct_holder);
+            }
+
+            else
+            {
+                struct_holder = (json_cmd::outfile_data){.path = pathy.path().filename(), .filesize = fs::file_size(pathy.path())};
+                
+                dir_size += fs::file_size(pathy.path());
+                sub_structure->inside.push_back(struct_holder);
+            }
+        }
+    }
+
+    else
+    {
+        for(auto pathy: fs::directory_iterator(dir_path))
+        {
+            if(!(fs::is_directory(pathy)))
+            {
+                struct_holder = (json_cmd::outfile_data){.path = pathy.path().filename(), .filesize = fs::file_size(pathy.path())};
+
+                sub_structure->inside.push_back(struct_holder);
+            }
+            
+            //std::cout << pathy.path() << '\n';
+        }
+    }
 }
 
-json_cmd::outfile_data createJSON_structure(json_cmd::infile_in_data in_data)
+json_cmd::outfile_data createJSON_structure(json_cmd::infile_in_data in_data, uintmax_t &dir_size_acc)
 {
     json_cmd::outfile_data out_data;
+    bool recursive;
 
-    if(fs::exists(in_data.path))
+    //std::cout << fs::path(in_data.path) << '\n';
+    std::string checkpath = fs::path(in_data.path);
+
+    if(fs::exists(checkpath))
     {
-        out_data.path = in_data.path;
-        //out_data.metadata = ?
-        out_data.datetime = date_time;
+        out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path)};
 
-        if(fs::is_directory(in_data.path))
+        if(fs::is_directory(checkpath))
         {
-            if(strcmp(in_data.type.c_str(),"fd")==0)
-            {
-                for(auto p: fs::recursive_directory_iterator(in_data.path))
-                {
-                    out_data.inside.push_back(json_cmd::outfile_data());
+            if(strcmp(in_data.type.c_str(),"fd")==0) recursive = true;
+            else if(strcmp(in_data.type.c_str(),"sd")==0) recursive = false;
+            //else raise an error
 
-                    if(fs::is_directory(in_data.path))
-                    {
-                        
-                    }
-
-                    else
-                    {
-                        
-                    }
-                    
-                    std::cout << p.path() << '\n';
-                }
-            }
-
-            else if(strcmp(in_data.type.c_str(),"sd")==0)
-            {
-                for(auto p: fs::directory_iterator(in_data.path))
-                {
-                    out_data.inside.push_back(json_cmd::outfile_data());
-
-                    std::cout << p.path() << '\n';
-                }
-            }
+            JSON_substructure(in_data.path, &out_data, recursive, dir_size_acc);
         }
 
-        else
-        {
-            
-            std::cout << in_data.path << '\n';
-        }
+        //else
+        //{
+            //out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path).filename()}; // doesnt make much sense to only include the filename... need the high level path
+        //    out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path)};
+            //std::cout << in_data.path << '\n';
+        //}
     
         return out_data;
     }
 
     else
     {
-        return -1; // problem?
+        std::cout << "apparently there is no dir?....";
+        return out_data; // return problem
+    }
+}
+
+void printtree(json_cmd::outfile_data *JSONTREE, bool firsttime, int padding = 0)
+{
+    std::string keep_path;
+
+    if(firsttime) std::cout << JSONTREE->path << '\n';
+
+    for(int index = 0; index < JSONTREE->inside.size(); ++index)
+    {
+        //std::cout << JSONTREE->inside[index].path << '\n';
+
+        if(JSONTREE->inside[index].inside.size()>0)
+        {
+            std::cout << std::string(padding, ' ') << JSONTREE->inside[index].path << '\n';
+            printtree(&JSONTREE->inside[index],false, ++padding);
+            --padding;
+        }
+
+        else
+        {
+            std::cout << std::string(padding, ' ') << JSONTREE->inside[index].path << '\n';
+        } 
     }
 }
 
@@ -161,6 +209,9 @@ int main(int argc, char **argv)
 
         json_cmd::infile_in_data infile_in;
         std::vector<json_cmd::outfile_data> JSON_structures;
+
+        uintmax_t space_required;
+        
         //Alternative to a linked list
 
         for(int index=0; index<jsonobject["input"].size(); ++index)
@@ -169,10 +220,20 @@ int main(int argc, char **argv)
             //std::cout << "infile_in[index] = " << infile_in[index].path << "\n";
 
             JSON_structures.push_back(json_cmd::outfile_data());
-            JSON_structures[index] = createJSON_structure(infile_in);
+            JSON_structures[index] = createJSON_structure(infile_in, space_required);
             //ref:https://stackoverflow.com/questions/8067338/vector-of-structs-initialization/8067443
+
+            //std::cout << infile_in.path << '\n';
         }
 
+        //std::cout << "SPACE REQUIRED= " << space_required << "\n";
+
+        for(int index = 0; index < JSON_structures.size(); ++index)
+        {
+            std::cout << "\n\n";
+            printtree(&JSON_structures[index], true);
+        }
+    
         std::cout << "output_cls = " << infile_out_dir.path << "\n";
         //std::cout << "input_cls = " << infile_in[0].path << "\n";
 
@@ -181,7 +242,5 @@ int main(int argc, char **argv)
 
         std::cout << "space avaliable = " << space_ready << endl;
 
-        //uintmax_t space_needed;
-        //space_required(std::string inputpath, uintmax_t &space) ;
     }
 }

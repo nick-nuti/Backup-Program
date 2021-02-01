@@ -9,6 +9,8 @@ using json = nlohmann::json;
 using namespace std;
 namespace fs = std::filesystem;
 
+std::string date_time;
+
 namespace json_cmd
 {
     struct infile_out_dir
@@ -38,9 +40,11 @@ namespace json_cmd
     struct outfile_data
     {
         std::string path;
-        std::string metadata;
+        std::string metadata; // I have no idea of how to get metadata....
         std::string datetime;
-        std::vector<std::string> inside;
+        
+        std::vector<json_cmd::outfile_data> inside;
+
     };
 }
 
@@ -67,14 +71,129 @@ void space_avaliable(std::string inputpath, uintmax_t &space)
     }
 }
 
-void space_required(std::string inputpath, uintmax_t &space)
+std::string current_time_date()
 {
+    std::string time_date;
+
+    time_t timey = time(0);
+    tm* timestruct = localtime(&timey);
+    
+    time_date=std::to_string(1900 + timestruct->tm_year)+('_')+std::to_string(1 + timestruct->tm_mon)+('_')+std::to_string(timestruct->tm_mday)+("__")+std::to_string(timestruct->tm_hour)+('_')+std::to_string(timestruct->tm_min)+('_')+std::to_string(timestruct->tm_sec);
+    std::cout << time_date << "\n";
+    return time_date;
+}
+
+void JSON_substructure(std::string dir_path, json_cmd::outfile_data *sub_structure, bool recursive)
+{
+    json_cmd::outfile_data struct_holder;
+
+    if(recursive == true)
+    {
+
+        for(auto pathy: fs::directory_iterator(dir_path))
+        {
+            if(fs::is_directory(pathy))
+            {
+                //std::cout << std::string(pathy.path()) << "\n";
+                struct_holder = (json_cmd::outfile_data){.path = pathy.path()};
+
+                JSON_substructure(std::string(pathy.path()), &struct_holder, true);
+                sub_structure->inside.push_back(struct_holder);
+            }
+
+            else
+            {
+                struct_holder = (json_cmd::outfile_data){.path = pathy.path().filename()};
+
+                sub_structure->inside.push_back(struct_holder);
+            }
+        }
+    }
+
+    else
+    {
+        for(auto pathy: fs::directory_iterator(dir_path))
+        {
+            if(!(fs::is_directory(pathy)))
+            {
+                struct_holder = (json_cmd::outfile_data){.path = pathy.path().filename()};
+
+                sub_structure->inside.push_back(struct_holder);
+            }
+            
+            //std::cout << pathy.path() << '\n';
+        }
+    }
+}
+
+json_cmd::outfile_data createJSON_structure(json_cmd::infile_in_data in_data)
+{
+    json_cmd::outfile_data out_data;
+    bool recursive;
+
+    //std::cout << fs::path(in_data.path) << '\n';
+    std::string checkpath = fs::path(in_data.path);
+
+    if(fs::exists(checkpath))
+    {
+        out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path)};
+
+        if(fs::is_directory(checkpath))
+        {
+            if(strcmp(in_data.type.c_str(),"fd")==0) recursive = true;
+            else if(strcmp(in_data.type.c_str(),"sd")==0) recursive = false;
+            //else raise an error
+
+            JSON_substructure(in_data.path, &out_data, recursive);
+        }
+
+        //else
+        //{
+            //out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path).filename()}; // doesnt make much sense to only include the filename... need the high level path
+        //    out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path)};
+            //std::cout << in_data.path << '\n';
+        //}
+    
+        return out_data;
+    }
+
+    else
+    {
+        std::cout << "apparently there is no dir?....";
+        return out_data; // return problem
+    }
+}
+
+void printtree(json_cmd::outfile_data *JSONTREE, bool firsttime, int padding = 0)
+{
+    std::string keep_path;
+
+    if(firsttime) std::cout << JSONTREE->path << '\n';
+
+    for(int index = 0; index < JSONTREE->inside.size(); ++index)
+    {
+        //std::cout << JSONTREE->inside[index].path << '\n';
+
+        if(JSONTREE->inside[index].inside.size()>0)
+        {
+            std::cout << std::string(padding, ' ') << JSONTREE->inside[index].path << '\n';
+            printtree(&JSONTREE->inside[index],false, ++padding);
+            --padding;
+        }
+
+        else
+        {
+            std::cout << std::string(padding, ' ') << JSONTREE->inside[index].path << '\n';
+        } 
+    }
 }
 
 int main(int argc, char **argv)
 {
     if (argc > 0)
     {
+        date_time = current_time_date();
+
         std::string originaljson = fs::absolute(argv[1]);
 
         std::ifstream inputjson(fs::absolute(argv[1]));
@@ -84,16 +203,28 @@ int main(int argc, char **argv)
 
         json_cmd::infile_out_dir infile_out_dir = jsonobject["output"].get<json_cmd::infile_out_dir>();
 
-        std::vector<json_cmd::infile_in_data> infile_in;
+        json_cmd::infile_in_data infile_in;
+        std::vector<json_cmd::outfile_data> JSON_structures;
         //Alternative to a linked list
+
         for(int index=0; index<jsonobject["input"].size(); ++index)
         {
-            infile_in.push_back(json_cmd::infile_in_data());
-            infile_in[index] = jsonobject["input"][index].get<json_cmd::infile_in_data>();
+            infile_in = jsonobject["input"][index].get<json_cmd::infile_in_data>();
+            //std::cout << "infile_in[index] = " << infile_in[index].path << "\n";
+
+            JSON_structures.push_back(json_cmd::outfile_data());
+            JSON_structures[index] = createJSON_structure(infile_in);
             //ref:https://stackoverflow.com/questions/8067338/vector-of-structs-initialization/8067443
-            std::cout << "infile_in[index] = " << infile_in[index] << "\n";
+
+            //std::cout << infile_in.path << '\n';
         }
 
+        for(int index = 0; index < JSON_structures.size(); ++index)
+        {
+            std::cout << "\n\n\n\n\n";
+            printtree(&JSON_structures[index], true);
+        }
+    
         std::cout << "output_cls = " << infile_out_dir.path << "\n";
         //std::cout << "input_cls = " << infile_in[0].path << "\n";
 

@@ -6,7 +6,7 @@
     "input": [
         {
             "type": "fd",
-            "path": "/mnt/c/Users/nickn/Documents/Budget Cuts Save Data"
+            "path": "/mnt/c/Users/nickn/Documents"
         },
         {
             "type": "f",
@@ -14,7 +14,7 @@
         },
         {
             "type": "sd",
-            "path": "/mnt/c/Program Files (x86)/Minecraft Launcher"
+            "path": "/mnt/c/Program Files (x86)/Call of Duty Modern Warfare"
         }
     ]
 }
