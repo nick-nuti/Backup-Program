@@ -42,7 +42,7 @@ namespace json_cmd
         std::string path;
         std::string metadata; // I have no idea of how to get metadata....
         std::string datetime;
-        uintmax_t filesize;
+        uintmax_t filesize = 0;
         std::vector<json_cmd::outfile_data> inside;
 
     };
@@ -58,7 +58,7 @@ void space_avaliable(std::string inputpath, uintmax_t &space)
         if (inputpath[path_index] == 47)
         {
             inputpath_substr = inputpath.substr(0, path_index);
-            std::cout << "inputpath_substr = " << inputpath_substr << endl;
+            //std::cout << "inputpath_substr = " << inputpath_substr << endl;
             if (fs::exists(inputpath_substr))
             {
                 fs::space_info dev_space = fs::space(inputpath_substr);
@@ -83,11 +83,9 @@ std::string current_time_date()
     return time_date;
 }
 
-void JSON_substructure(std::string dir_path, json_cmd::outfile_data *sub_structure, bool recursive, uintmax_t &dir_size_acc)
+void JSON_substructure(std::string dir_path, json_cmd::outfile_data *sub_structure, bool recursive, uintmax_t &dir_size)
 {
     json_cmd::outfile_data struct_holder;
-    uintmax_t dir_size = dir_size_acc;
-    std::cout << "SPACE REQUIRED= " << dir_size_acc << "\n";
 
     if(recursive == true)
     {
@@ -96,8 +94,8 @@ void JSON_substructure(std::string dir_path, json_cmd::outfile_data *sub_structu
         {
             if(fs::is_directory(pathy))
             {
-                //std::cout << std::string(pathy.path()) << "\n";
-                struct_holder = (json_cmd::outfile_data){.path = pathy.path()};
+                //struct_holder = (json_cmd::outfile_data){.path = pathy.path()};
+                struct_holder.path = pathy.path();
 
                 JSON_substructure(std::string(pathy.path()), &struct_holder, true, dir_size);
 
@@ -109,6 +107,7 @@ void JSON_substructure(std::string dir_path, json_cmd::outfile_data *sub_structu
                 struct_holder = (json_cmd::outfile_data){.path = pathy.path().filename(), .filesize = fs::file_size(pathy.path())};
                 
                 dir_size += fs::file_size(pathy.path());
+                //std::cout << pathy.path() << "SPACE REQUIRED= " << fs::file_size(pathy.path()) << "\n" << "Accumulation: " << dir_size << "\n";
                 sub_structure->inside.push_back(struct_holder);
             }
         }
@@ -123,14 +122,14 @@ void JSON_substructure(std::string dir_path, json_cmd::outfile_data *sub_structu
                 struct_holder = (json_cmd::outfile_data){.path = pathy.path().filename(), .filesize = fs::file_size(pathy.path())};
 
                 sub_structure->inside.push_back(struct_holder);
+
+                dir_size += fs::file_size(pathy.path());
             }
-            
-            //std::cout << pathy.path() << '\n';
         }
     }
 }
 
-json_cmd::outfile_data createJSON_structure(json_cmd::infile_in_data in_data, uintmax_t &dir_size_acc)
+json_cmd::outfile_data createJSON_structure(json_cmd::infile_in_data in_data, uintmax_t &dir_size)
 {
     json_cmd::outfile_data out_data;
     bool recursive;
@@ -140,7 +139,8 @@ json_cmd::outfile_data createJSON_structure(json_cmd::infile_in_data in_data, ui
 
     if(fs::exists(checkpath))
     {
-        out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path)};
+        //out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path)};
+        out_data.path = fs::path(in_data.path);
 
         if(fs::is_directory(checkpath))
         {
@@ -148,16 +148,18 @@ json_cmd::outfile_data createJSON_structure(json_cmd::infile_in_data in_data, ui
             else if(strcmp(in_data.type.c_str(),"sd")==0) recursive = false;
             //else raise an error
 
-            JSON_substructure(in_data.path, &out_data, recursive, dir_size_acc);
+            JSON_substructure(in_data.path, &out_data, recursive, dir_size);
         }
 
-        //else
-        //{
-            //out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path).filename()}; // doesnt make much sense to only include the filename... need the high level path
-        //    out_data = (json_cmd::outfile_data){.path = fs::path(in_data.path)};
-            //std::cout << in_data.path << '\n';
-        //}
+        else 
+        {
+            //out_data = (json_cmd::outfile_data){.filesize = fs::file_size(in_data.path)};
+            out_data.filesize = fs::file_size(in_data.path);
+            dir_size = fs::file_size(in_data.path);
+        }
     
+        std::cout << "FILE SPACE REQUIRED= " << dir_size << "\n";
+
         return out_data;
     }
 
@@ -211,30 +213,35 @@ int main(int argc, char **argv)
         std::vector<json_cmd::outfile_data> JSON_structures;
 
         uintmax_t space_required;
-        
-        //Alternative to a linked list
+        uintmax_t space_required_acc = 0;
 
         for(int index=0; index<jsonobject["input"].size(); ++index)
         {
+            space_required = 0;
+
             infile_in = jsonobject["input"][index].get<json_cmd::infile_in_data>();
             //std::cout << "infile_in[index] = " << infile_in[index].path << "\n";
 
             JSON_structures.push_back(json_cmd::outfile_data());
             JSON_structures[index] = createJSON_structure(infile_in, space_required);
+
+            space_required_acc += space_required;
+
             //ref:https://stackoverflow.com/questions/8067338/vector-of-structs-initialization/8067443
 
-            //std::cout << infile_in.path << '\n';
+            //std::cout << "\n\n" << JSON_structures[index].path << "\n";
+            //std::cout << "SPACE REQUIRED= " << space_required << "\n";
         }
 
-        //std::cout << "SPACE REQUIRED= " << space_required << "\n";
+        std::cout << "Final SPACE REQUIRED= " << space_required_acc << "\n";
 
-        for(int index = 0; index < JSON_structures.size(); ++index)
+        /*for(int index = 0; index < JSON_structures.size(); ++index)
         {
             std::cout << "\n\n";
             printtree(&JSON_structures[index], true);
-        }
+        }*/
     
-        std::cout << "output_cls = " << infile_out_dir.path << "\n";
+        //std::cout << "output_cls = " << infile_out_dir.path << "\n";
         //std::cout << "input_cls = " << infile_in[0].path << "\n";
 
         uintmax_t space_ready;
