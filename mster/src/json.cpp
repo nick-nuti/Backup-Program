@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
-#include "directoryTree.h"
+#include "directoryTree.hpp"
 
 using namespace std;
 using json = nlohmann::json;

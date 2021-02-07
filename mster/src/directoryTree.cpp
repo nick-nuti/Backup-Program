@@ -1,8 +1,9 @@
 #include <filesystem>
 #include <iostream>
 #include <chrono>
+#include <vector>
 
-#include "directoryTree.h"
+#include "directoryTree.hpp"
 
 using namespace std;
 namespace fs = filesystem;
@@ -18,9 +19,14 @@ namespace fs = filesystem;
 // maybe make void fn
 int _timeLastWritten(fs::directory_entry entry) 
 {
-    fs::file_time_type ftime = fs::last_write_time(entry);
+    // fs::file_time_type ftime = fs::last_write_time(entry);
+    // time_t litime = decltype(ftime)::clock::to_time_t(ftime);
+    // return litime;
+    /*
+        ./directoryTree.cpp:23:45: error: no member named 'to_time_t' in 'std::filesystem::__file_clock'
     time_t litime = decltype(ftime)::clock::to_time_t(ftime);
-    return litime;
+    */
+   return 1;
 }
 
 void _filePermissions(Node *file) 
