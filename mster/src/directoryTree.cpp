@@ -57,8 +57,10 @@ void populate(const char *dir, Node *parent)
             parent->size += size;
 
             struct Node file = { entry.path(), size };
+
             file.timeLastWritten = _timeLastWritten(entry);
             _filePermissions(&file);
+            file.filename = entry.path().filename();
 
             parent->children.push_back(file);
         };

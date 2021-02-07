@@ -4,7 +4,7 @@
 #include <iostream>
 #include <chrono>
 
-#include "directoryTree.h"
+#include "json.h"
 
 int main(int argc, char **argv, char *envp[])
 {
@@ -17,6 +17,9 @@ int main(int argc, char **argv, char *envp[])
     populate(root.path.c_str(), &root);
 
     printTree(root);
+
+    generateOutputTree(&root);
+
 
     return 0;
 }
