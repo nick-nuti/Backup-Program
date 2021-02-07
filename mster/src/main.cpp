@@ -16,7 +16,7 @@ int main(int argc, char **argv, char *envp[])
     Node root = { sourceDir, 0 };
     populate(root.path.c_str(), &root);
 
-    printTree(root, 0);
+    printTree(root);
 
     return 0;
 }

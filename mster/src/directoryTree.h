@@ -13,4 +13,4 @@ typedef struct Node
 
 void populate(const char *dir, Node *parent);
 
-void printTree(Node node, int padding);
+void printTree(Node node, int padding = 0);
