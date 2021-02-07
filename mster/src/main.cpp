@@ -1,4 +1,4 @@
-// g++-8 -std=c++17 ./*.cpp -o ./main.out -lstdc++fs
+// clang++ -std=c++17 ./*.cpp -o ./main.out -lstdc++fs
 
 #include <filesystem>
 #include <iostream>
