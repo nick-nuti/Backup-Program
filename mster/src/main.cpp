@@ -10,15 +10,8 @@ using namespace std;
 
 int main(int argc, char **argv, char *envp[])
 {
-    char *sourceDir = argv[1];
-    char *destinationDir = argv[2];
-
-    printf("Using source directory: %s\n\n", sourceDir);
-
     backupParameters params;
     generateInputParameters(&params);
-
-    cout << get<0>(params.output) << endl;
 
     vector<Node> roots;
     nlohmann::json::array_t container;
