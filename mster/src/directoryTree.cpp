@@ -17,15 +17,8 @@ namespace fs = filesystem;
 */
 
 // maybe make void fn
-int _timeLastWritten(fs::directory_entry entry) 
+int _timeLastWritten(string path) 
 {
-    // fs::file_time_type ftime = fs::last_write_time(entry);
-    // time_t litime = decltype(ftime)::clock::to_time_t(ftime);
-    // return litime;
-    /*
-        ./directoryTree.cpp:23:45: error: no member named 'to_time_t' in 'std::filesystem::__file_clock'
-    time_t litime = decltype(ftime)::clock::to_time_t(ftime);
-    */
    return 1;
 }
 
@@ -43,33 +36,46 @@ void _filePermissions(Node *file)
     + ((filePerms & fs::perms::others_exec) != fs::perms::none ? "x" : "-");
 }
 
-void populate(const char *dir, Node *parent)
+void populate(const char *dir, Node *parent, string flag)
 {
-    for(fs::directory_entry entry : fs::directory_iterator(dir)) {
-        if (entry.is_directory() == true) 
+    // file: file only
+    if (flag == "f") {
+        parent->timeLastWritten = _timeLastWritten(""); // placeholder
+        parent->path = fs::path(parent->path).filename();
+        parent->size = fs::file_size(parent->path);
+        _filePermissions(parent);
+    }
+
+    // file directory or surface directory
+    if (flag == "fd" || flag == "sd") 
+    {
+        for (fs::directory_entry entry : fs::directory_iterator(dir)) 
         {
-            string path = entry.path();
+            if (entry.is_directory() == true && flag == "fd") // only recurse on fd
+            {
+                string path = entry.path();
 
-            struct Node child = { path, 0 };
+                struct Node child = { path, 0 };
 
-            populate(path.c_str(), &child);
+                populate(path.c_str(), &child, flag);
 
-            parent->children.push_back(child);
-            parent->size += child.size;
-        } 
-        else if (entry.is_regular_file() == true) 
-        {
-            int size = fs::file_size(entry.path());
-            parent->size += size;
+                parent->children.push_back(child);
+                parent->size += child.size;
+            } 
+            else if (entry.is_regular_file() == true) 
+            {
+                int size = fs::file_size(entry.path());
+                parent->size += size;
 
-            struct Node file = { entry.path(), size };
+                struct Node file = { entry.path(), size };
 
-            file.timeLastWritten = _timeLastWritten(entry);
-            _filePermissions(&file);
-            file.filename = entry.path().filename();
+                file.timeLastWritten = _timeLastWritten(""); // placeholder
+                _filePermissions(&file);
+                file.filename = entry.path().filename();
 
-            parent->children.push_back(file);
-        };
+                parent->children.push_back(file);
+            };
+        }
     }
 }
 

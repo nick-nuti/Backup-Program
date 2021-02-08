@@ -1,0 +1,16 @@
+{
+	"output": {
+		"name": "Backup-1",
+		"path": "/home/m/backups/"
+	},
+	"input": [
+		{
+			"type": "sd",
+			"path": "/home/m/code/cpp/Backup-Program/mster/"
+		},
+        {
+			"type": "fd",
+			"path": "/home/m/Downloads/"
+		}
+	]
+}

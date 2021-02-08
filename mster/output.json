@@ -1,0 +1,76 @@
+{
+	"files": [
+		{
+			"children": [
+				{
+					"filename": "output.json",
+					"path": "/home/m/code/cpp/Backup-Program/mster/output.json",
+					"perms": "rw-rw-r--",
+					"size": 814,
+					"timeLastWritten": 1
+				},
+				{
+					"filename": "input.json",
+					"path": "/home/m/code/cpp/Backup-Program/mster/input.json",
+					"perms": "rw-rw-r--",
+					"size": 228,
+					"timeLastWritten": 1
+				},
+				{
+					"filename": ".gitignore",
+					"path": "/home/m/code/cpp/Backup-Program/mster/.gitignore",
+					"perms": "rw-rw-r--",
+					"size": 13,
+					"timeLastWritten": 1
+				}
+			],
+			"path": "/home/m/code/cpp/Backup-Program/mster/",
+			"size": 1055,
+			"timeLastWritten": 0
+		},
+		{
+			"children": [
+				{
+					"children": [
+						{
+							"children": [
+								{
+									"filename": "code_1.53.0-1612368357_amd64.deb",
+									"path": "/home/m/Downloads/assets/vscode/code_1.53.0-1612368357_amd64.deb",
+									"perms": "rw-rw-r--",
+									"size": 69074128,
+									"timeLastWritten": 1
+								}
+							],
+							"path": "/home/m/Downloads/assets/vscode",
+							"size": 69074128,
+							"timeLastWritten": 0
+						},
+						{
+							"children": [
+								{
+									"filename": "discord-0.0.13.deb",
+									"path": "/home/m/Downloads/assets/discord/discord-0.0.13.deb",
+									"perms": "rw-rw-r--",
+									"size": 70624982,
+									"timeLastWritten": 1
+								}
+							],
+							"path": "/home/m/Downloads/assets/discord",
+							"size": 70624982,
+							"timeLastWritten": 0
+						}
+					],
+					"path": "/home/m/Downloads/assets",
+					"size": 139699110,
+					"timeLastWritten": 0
+				}
+			],
+			"path": "/home/m/Downloads/",
+			"size": 139699110,
+			"timeLastWritten": 0
+		}
+	],
+	"name": "Backup-1",
+	"path": "/home/m/backups/"
+}

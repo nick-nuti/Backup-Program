@@ -1,4 +1,7 @@
+#ifndef DIR_TREE_HEADER
+#define DIR_TREE_HEADER
 
+#include <vector>
 
 struct Node
 {
@@ -12,6 +15,8 @@ struct Node
     std::vector<Node> children;
 };
 
-void populate(const char *dir, Node *parent);
+void populate(const char *dir, Node *parent, std::string flag = "");
 
 void printTree(Node node, int padding = 0);
+
+#endif

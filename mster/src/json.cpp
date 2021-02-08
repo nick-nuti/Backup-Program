@@ -4,18 +4,19 @@
 #include <fstream>
 
 #include "directoryTree.hpp"
+#include "json.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
 void writeJSON(json::object_t *obj, string *writeLocation)
 {
-    ofstream jsonFile("out.json");
+    ofstream jsonFile("./output.json");
     jsonFile << *obj;
     jsonFile.close();
 }
 
-void generateOutputTree(Node *node, json::array_t *pArr, bool root) {
+void generateOutputTree(Node *node, json::array_t *container, json::array_t *pArr, bool root) {
 
     json::object_t metadata = json::object({
         { "path", node->path },
@@ -23,6 +24,7 @@ void generateOutputTree(Node *node, json::array_t *pArr, bool root) {
         { "timeLastWritten", node->timeLastWritten }
     });
 
+    // Directories do not have a filename, nor do they have permissions.
     if (node->filename != "") metadata["filename"] = node->filename;
     if (node->perms != "") metadata["perms"] = node->perms;
 
@@ -32,7 +34,7 @@ void generateOutputTree(Node *node, json::array_t *pArr, bool root) {
 
         for(int i = 0; i < node->children.size(); i++) {
             Node child_ptr = node->children.at(i);
-            generateOutputTree(&child_ptr, &children, false);
+            generateOutputTree(&child_ptr, nullptr, &children, false);
         }
 
         metadata["children"] = children;
@@ -41,7 +43,25 @@ void generateOutputTree(Node *node, json::array_t *pArr, bool root) {
     if (root == false) {
         pArr->push_back(metadata);
     } else {
-        string writeLoc = "./";
-        writeJSON(&metadata, &writeLoc);
+        container->push_back(metadata);
+    }
+}
+
+// read from json input file
+// determine which trees need to be built
+// assign appropriate flags (f = file only, sd = surface directory (no children), fd = file directory (a.k.a. normal dir tree))
+// pass this info
+
+void generateInputParameters(backupParameters *params)
+{
+    string inputFileLocation = "./input.json";
+
+    ifstream rawJSONFile(inputFileLocation);
+    json parsed = json::parse(rawJSONFile);
+
+    params->output = make_pair(parsed["output"]["path"], parsed["output"]["name"]);
+
+    for(int i = 0; i < parsed["input"].size(); i++) {
+        params->input.push_back(make_pair(parsed["input"].at(i)["path"], parsed["input"].at(i)["type"]));
     }
 }
