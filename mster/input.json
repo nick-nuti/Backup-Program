@@ -11,6 +11,10 @@
         {
 			"type": "fd",
 			"path": "/home/m/Downloads/"
-		}
+		},
+        {
+            "type": "f",
+            "path": "/home/m/Downloads/assets/discord/discord-0.0.13.deb"
+        }
 	]
 }

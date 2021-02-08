@@ -41,7 +41,7 @@ void populate(const char *dir, Node *parent, string flag)
     // file: file only
     if (flag == "f") {
         parent->timeLastWritten = _timeLastWritten(""); // placeholder
-        parent->path = fs::path(parent->path).filename();
+        parent->filename = fs::path(parent->path).filename();
         parent->size = fs::file_size(parent->path);
         _filePermissions(parent);
     }
