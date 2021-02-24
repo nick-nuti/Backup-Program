@@ -1,0 +1,12 @@
+{
+	"output": {
+		"name": "Backup-1",
+		"path": "/home/m/backups/"
+	},
+	"input": [
+		{
+			"type": "fd",
+			"path": "/home/m/code/cpp/Backup-Program/"
+		}
+	]
+}
