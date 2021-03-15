@@ -124,7 +124,7 @@ void printTree(Node node, int padding)
     };
 }
 
-void space_check(string inputpath, uintmax_t space_required_acc, int &err_check)
+void space_check(string inputpath, uintmax_t space_required_acc, bool &err_check)
 {
     string inputpath_substr;
     uintmax_t space_available;
@@ -151,6 +151,7 @@ void space_check(string inputpath, uintmax_t space_required_acc, int &err_check)
 
     if(space_available > space_required_acc)
     {
+        cout << "The backup will require approximately " << space_required_acc << " Bytes\n";
         cout << "There will be " << space_available-space_required_acc << " Bytes remaining after backup.\nProceed? [Y/n]: ";
 
         // Typically, prompts use a `Y/n` syntax which means YES is default.
@@ -161,7 +162,7 @@ void space_check(string inputpath, uintmax_t space_required_acc, int &err_check)
         if (!(allow == 'Y' || allow == 'y' || allow == '\n'))
         {
             //should exit + result in some sort of an error
-            //err_check = an error
+            err_check = false;
             cout << "Exiting...\n";
         } 
         else
@@ -174,7 +175,7 @@ void space_check(string inputpath, uintmax_t space_required_acc, int &err_check)
     else
     {
         //should exit + result in some sort of an error
-        //err_check = an error
+        err_check = false;
         cout << "There wasn't enough space in " << inputpath << " to proceed.\n";
         cout << "Space available: " << space_available << " bytes, Space required: " << space_required_acc << " bytes\n" ;
     }

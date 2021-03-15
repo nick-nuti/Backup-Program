@@ -30,6 +30,6 @@ void populate(const std::string path, const int flag, Node *parent);
 
 void printTree(Node node, int padding = 0);
 
-void space_check(std::string inputpath, uintmax_t space_required_acc, int &err_check);
+void space_check(std::string inputpath, uintmax_t space_required_acc, bool &err_check);
 
 #endif

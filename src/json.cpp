@@ -9,10 +9,10 @@
 using namespace std;
 using json = nlohmann::json;
 
-void writeJSON(json *obj, string *writeLocation)
+void writeJSON(json obj, string fileout)
 {
-    ofstream jsonFile(writeLocation->c_str());
-    jsonFile << *obj;
+    ofstream jsonFile(fileout.c_str());
+    jsonFile << obj;
     jsonFile.close();
 }
 

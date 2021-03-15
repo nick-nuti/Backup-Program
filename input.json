@@ -1,12 +1,12 @@
 {
 	"output": {
 		"name": "Backup-1",
-		"path": "/home/m/backups/"
+		"path": "/mnt/c/Users/nickn/Desktop/backupprog_repo/make/this/dir"
 	},
 	"input": [
 		{
 			"type": "fd",
-			"path": "/home/m/code/cpp/Backup-Program/"
+			"path": "/mnt/c/Users/nickn/Documents"
 		}
 	]
 }

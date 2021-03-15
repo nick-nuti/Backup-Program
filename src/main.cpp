@@ -28,16 +28,23 @@ int main(int argc, char **argv)
     /*
         Check space required for backup
     */
-    int err_check;
+    bool err_check = true;
     space_check(get<0>(params.output), space_required_acc, err_check);
 
+    if(err_check == true)
+    {
+        /*
+            Write JSON tree to file in backup location 
+        */
+        string outputDataWritePath;
+        
+        if(params.output.first[params.output.first.length()-1] == 47) outputDataWritePath = params.output.first + params.output.second + ".json";
+        else outputDataWritePath = params.output.first + "/" + params.output.second + ".json";
 
-    /*
-        Write JSON tree to file in backup location 
-    */
-    string outputDataWritePath = get<0>(params.output) + get<1>(params.output) + ".json";
-    cout << "Writing json backup to: " << outputDataWritePath << endl;
-    writeJSON(&outputTree, &outputDataWritePath);
+        cout << "Writing json backup to: " << outputDataWritePath << endl;
+
+        writeJSON(outputTree, outputDataWritePath);
+    }
 
     return 0;
 
