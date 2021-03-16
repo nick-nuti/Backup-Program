@@ -9,7 +9,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-void writeJSON(json obj, string fileout)
+void writeJSON(json &obj, string fileout)
 {
     ofstream jsonFile(fileout.c_str());
     jsonFile << obj;
@@ -97,4 +97,6 @@ void generateInputParameters(backupParameters *params, std::string out_path)
     {
         params->input.push_back(make_pair(parsed["input"].at(i)["path"], parsed["input"].at(i)["type"]));
     }
+
+    rawJSONFile.close();
 }
