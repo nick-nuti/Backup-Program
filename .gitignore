@@ -1,3 +1,4 @@
 *.out
+*.json
 .vscode
-output*.json
+*.exe
