@@ -1,12 +1,16 @@
 {
 	"output": {
-		"name": "Backup-1",
-		"path": "/home/m/backups/"
+		"name": "BACKUP-TESTBENCH",
+		"path": "C:/Users/nickn/Documents/BACKUP-REPO/backupdestzzz"
 	},
 	"input": [
 		{
-			"type": "fd",
-			"path": "/home/m/code/cpp/Backup-Program/"
+			"type": "sd",
+			"path": "C:/Users/nickn/Documents/BACKUP-REPO/sample-dir/finalproject_group_5"
+		},
+		{
+			"type": "sd",
+			"path": "C:/Users/nickn/Documents/BACKUP-REPO/sample-dir/Microsoft"
 		}
 	]
 }

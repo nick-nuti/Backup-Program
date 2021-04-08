@@ -1,3 +1,7 @@
 *.out
+*.json
 .vscode
-output*.json
+*.exe
+sample-dir
+install
+test_directory

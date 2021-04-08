@@ -4,41 +4,40 @@
 #include <iostream>
 #include <chrono>
 #include <fstream>
+#include <stdio.h>
 
-#include "json.hpp"
+#include "tree.hpp"
+#include "filecopy.hpp"
+#include "sha256_hash.hpp"
 
-using namespace std;
-namespace fs = std::filesystem;
+using namespace std::filesystem;
 
 int main(int argc, char **argv) 
 {  
-    /*
-        Read input.json file and generate backupParameters
-    */
-    backupParameters params;
-    generateInputParameters(&params, fs::absolute(argv[1]));
-    uintmax_t space_required_acc = 0;
+    auto start_time = chrono::steady_clock::now();
 
-    /*
-        Generate a JSON representation of the backup directory
-    */
-    nlohmann::json outputTree;
-    generateOutputTree(&params, &outputTree, &space_required_acc);
+    std::string inputJSONPath = argv[1];
+    std::cout << "Building digest from: " << argv[1] << std::endl << std::endl;
 
-    /*
-        Check space required for backup
-    */
-    int err_check;
-    space_check(get<0>(params.output), space_required_acc, err_check);
+    BackupParams backupParams = generateBackupParams(inputJSONPath);
 
+    // create named backup parent directory (holds invidual backups) 
+    if(!exists(backupParams.outputPath + backupParams.backupLabel))    
+    {
+        create_directories(backupParams.outputPath + backupParams.backupLabel);
+    }
 
-    /*
-        Write JSON tree to file in backup location 
-    */
-    string outputDataWritePath = get<0>(params.output) + get<1>(params.output) + ".json";
-    cout << "Writing json backup to: " << outputDataWritePath << endl;
-    writeJSON(&outputTree, &outputDataWritePath);
+    std::string backupDigestLocation;
+
+    buildDigest(backupParams, backupDigestLocation);
+
+    cout << "backupDigestLocation: " << backupDigestLocation << endl;
+
+    // filecopy(backupDigestLocation);
+
+    auto end_time = chrono::steady_clock::now();
+
+    std::cout << "Time Elapsed: " << chrono::duration_cast<chrono::milliseconds>(end_time-start_time).count() << " ms" << endl;
 
     return 0;
-
 }
