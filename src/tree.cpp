@@ -1,11 +1,15 @@
+<<<<<<< HEAD
 // possibly....
 // clang++ -std=c++17 ../src/*.cpp -o main.exe -I"C:\Program Files\OpenSSL-Win64\include" -L"C:\Program Files\OpenSSL-Win64\lib" -lssl -lcrypto -lstdc++fs
+=======
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
 #include <iostream>
 #include <filesystem>
 #include <map>
 #include <fstream>
 #include <ctime>
 #include <regex>
+<<<<<<< HEAD
 #include <stdio.h>
 
 #include "rapidjson/document.h"
@@ -15,6 +19,16 @@
 
 #include "tree.hpp"
 #include "sha256_hash.hpp"
+=======
+
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include <rapidjson/prettywriter.h>
+#include "rapidjson/filewritestream.h"
+
+#include "tree.hpp"
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
 
 using namespace rapidjson;
 using namespace std;
@@ -31,7 +45,13 @@ BackupParams generateBackupParams(string path)
     inputJSON.ParseStream(isw);
 
     vector<SourceParam> sourceParams;
+<<<<<<< HEAD
     for(int i = 0; i < inputJSON["input"].Size(); i++)
+=======
+    int i = 0;
+    int len = inputJSON["input"].Size();
+    for(; i < len; i++)
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
     {
         string path = inputJSON["input"][i]["path"].GetString();
         string flag = inputJSON["input"][i]["type"].GetString();
@@ -43,6 +63,7 @@ BackupParams generateBackupParams(string path)
         sourceParams.push_back(sourceParam);
     }
 
+<<<<<<< HEAD
     string backupLabel(inputJSON["output"]["name"].GetString());
     string outputPath(inputJSON["output"]["path"].GetString());
 
@@ -51,20 +72,35 @@ BackupParams generateBackupParams(string path)
 
     // timestamp generated here!
     string ts = to_string(time(nullptr));
+=======
+    time_t timestamp = time(nullptr);
+    string backupLabel(inputJSON["output"]["name"].GetString());
+    string outputPath(inputJSON["output"]["path"].GetString());
+
+    outputPath += ("/" + backupLabel + "-" + to_string(timestamp) + ".json"); 
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
 
     BackupParams b {
         .backupLabel = backupLabel,
         .outputPath = outputPath,
+<<<<<<< HEAD
         .ts = ts,
+=======
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
         .sourceParams = sourceParams
     };
 
     return b;
 }
 
+<<<<<<< HEAD
 uintmax_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s, vector<string> &hashes)
 {
     // get inode information
+=======
+int64_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s)
+{
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
     struct stat st;
     stat(s.path.c_str(), &st);
 
@@ -78,23 +114,33 @@ uintmax_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s, ve
     
     // DECORATE
     writer.Key("path");
+<<<<<<< HEAD
     size_t lastslash = s.path.find_last_of("/"); 
     writer.String(s.path.substr(lastslash+1).c_str()); 
     //writer.String(s.path.c_str());
+=======
+    writer.String(s.path.c_str());
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
 
     writer.Key("timeLastWritten");
     writer.Int64(st.st_mtime);
 
     uintmax_t sizeAcc = st.st_size ? st.st_size : 0;
+<<<<<<< HEAD
     char hash[65];
+=======
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
 
     if ((s.flag == flagMap["fd"] || s.flag == flagMap["sd"]) && S_ISDIR(st.st_mode))
     {
         writer.Key("contents");
         writer.StartArray();
 
+<<<<<<< HEAD
         vector<string> subdirectory_hashes;
 
+=======
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
         try {
             for (directory_entry entry : directory_iterator(s.path))
             {
@@ -106,9 +152,13 @@ uintmax_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s, ve
                     .flag = (s.flag == flagMap["fd"] ? flagMap["fd"] : flagMap["f"])
                 };
 
+<<<<<<< HEAD
                 // accumulate size of children
                 if((s.flag == flagMap["sd"]) && (!is_directory(entry))) sizeAcc += traverseTree(writer, sourceParam, subdirectory_hashes); 
                 else continue; 
+=======
+                sizeAcc += traverseTree(writer, sourceParam);
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
             }
         } catch (exception& e) {
             cout << "Unable to open " << s.path.c_str() << endl;
@@ -117,6 +167,7 @@ uintmax_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s, ve
         }
 
         writer.EndArray();
+<<<<<<< HEAD
         
         sha256_dir(subdirectory_hashes, false, hash);
 
@@ -139,6 +190,8 @@ uintmax_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s, ve
         writer.String(hash);
         
         hashes.push_back(hash); //for the overall hash
+=======
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
     }
 
     writer.Key("size");
@@ -150,6 +203,7 @@ uintmax_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s, ve
     return sizeAcc;
 } 
 
+<<<<<<< HEAD
 void buildDigest(BackupParams &backupParams, string &backupDigestLocation)
 {
     // individal backup (IB) directory label
@@ -166,6 +220,13 @@ void buildDigest(BackupParams &backupParams, string &backupDigestLocation)
     cout << "Writing digest to: " << backupDigestLocation << endl;
 
     if(FILE* fp = fopen(backupDigestLocation.c_str(), "w+"))
+=======
+void buildDigest(BackupParams &backupParams)
+{
+    cout << "Writing digest to: " << backupParams.outputPath << endl;
+
+    if(FILE* fp = fopen(backupParams.outputPath.c_str(), "w+"))
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
     {
         char writeBuf[65536];
         FileWriteStream outStream(fp, writeBuf, sizeof(writeBuf));
@@ -177,6 +238,7 @@ void buildDigest(BackupParams &backupParams, string &backupDigestLocation)
         fsWriter.Key("files");
         fsWriter.StartArray();
 
+<<<<<<< HEAD
         vector<string> hashes;
         uintmax_t totalbackupsize = 0;
 
@@ -202,4 +264,17 @@ void buildDigest(BackupParams &backupParams, string &backupDigestLocation)
     }
 
     else throw runtime_error("Error opening digest file.");
+=======
+        for (const SourceParam& s : backupParams.sourceParams)
+        {
+            traverseTree(fsWriter, s);
+        }
+
+        fsWriter.EndArray();
+        fsWriter.EndObject();
+        
+    } else {
+        throw runtime_error("Error opening digest file.");
+    }
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
 }

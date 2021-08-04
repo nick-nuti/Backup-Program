@@ -1,7 +1,11 @@
 *.out
 *.json
 .vscode
+<<<<<<< HEAD
 *.exe
 sample-dir
 install
 test_directory
+=======
+*.exe
+>>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207

@@ -1,0 +1,20 @@
+{
+	"output": {
+		"name": "Name_of_Output_Digest",
+		"path": "/path/to/output/"
+	},
+	"input": [
+		{
+			"type": "fd",
+			"path": "/path/to/dir"
+		},
+		{
+			"type": "f",
+			"path": "path/to/file.ext"
+		},
+		{
+			"type": "sd",
+			"path": "/path/to/surface_dir"
+		}
+	]
+}
