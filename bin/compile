@@ -1,2 +1,0 @@
-# @mster's build settings
-clang++ -std=c++17 /home/m/code/cpp/Backup-Program/mster/src/*.cpp -o /home/m/code/cpp/Backup-Program/mster/bin/main.out -lstdc++fs 
