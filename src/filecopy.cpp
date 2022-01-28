@@ -1,105 +1,74 @@
-#include <filesystem>
-#include <iostream>
-#include <stdio.h>
+#include "filecopy.hpp"
 
-#include "rapidjson\document.h"
-#include "rapidjson\filereadstream.h"
- 
-using namespace std;
-using namespace rapidjson;
+#include <pthread.h>
+
 namespace fs = std::filesystem;
 
-void recursive_arrcopy(Value::ConstMemberIterator itr1)
+void recursive_arrcopy(rapidjson::Value::ConstMemberIterator itr1, const int sourceitem_type, const std::string sourceitem_path, const std::string sub_dest_path)
 {
-    for (Value::ConstValueIterator itr2 = itr1->value.Begin(); itr2 != itr1->value.End(); ++itr2) // arrays
+    std::string next_path;
+    std::string source_path;
+
+    for (rapidjson::Value::ConstValueIterator itr2 = itr1->value.Begin(); itr2 != itr1->value.End(); ++itr2) // arrays
     {
-        for (Value::ConstMemberIterator itr3 = itr2->MemberBegin(); itr3 != itr2->MemberEnd(); ++itr3) // objects
+        for (rapidjson::Value::ConstMemberIterator itr3 = itr2->MemberBegin(); itr3 != itr2->MemberEnd(); ++itr3) // objects
         {
-            if(itr3->value.IsString()) printf("STRING Member %s is %s\n", itr3->name.GetString(), itr3->value.GetString());
-            else if(itr3->value.IsInt64()) printf("NUMBER Member %s is %d\n", itr3->name.GetString(), itr3->value.GetInt());
-            else if(itr3->value.IsBool()) printf("BOOL Member %s is %s\n", itr3->name.GetString(), itr3->value.GetBool() ? "True" : "False");
-            else if(itr3->value.IsArray())
+            if(strcmp(itr3->name.GetString(),"path") == 0)
             {
-                printf("Array Member %s\n", itr1->name.GetString());
-                recursive_arrcopy(itr3);
+                next_path = sub_dest_path + '/' + itr3->value.GetString();
+                source_path = sourceitem_path + '/' + itr3->value.GetString();
+
+                if(fs::is_regular_file(source_path)) 
+                {
+                    fs::copy(source_path, next_path);
+                }
+
+                else if((sourceitem_type == 0) && (fs::is_directory(source_path)))
+                {
+                    fs::create_directory(next_path);
+                }
+            }
+
+            else if(itr3->value.IsArray() && sourceitem_type != 1)
+            {
+                recursive_arrcopy(itr3, 0, source_path, next_path);
             }
         }
     }
 }
 
-void filecopy(string jsonname)
+void filecopy(BackupParams backupParams, std::string json_location, std::string backupDir_fullpath)
 {
-    FILE* fp = fopen(jsonname.c_str(), "r");
+    FILE* fp = fopen(json_location.c_str(), "r");
 
     char readBuffer[4096];
-    FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-
-    Document document;
+    rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+    rapidjson::Document document;
     document.ParseStream(is);
 
-    fs::create_directory("backup");
-    fs::current_path("backup");
-
     // object -> array -> object -> array -> recursive -> object -> array....
+    int srcparam_iter = 0;
 
-    for (Value::ConstValueIterator itr = document["files"].Begin(); itr != document["files"].End(); ++itr) // arrays
+    for (rapidjson::Value::ConstValueIterator itr = document["files"].Begin(); itr != document["files"].End(); ++itr, ++srcparam_iter) // arrays
     {
-        for (Value::ConstMemberIterator itr1 = itr->MemberBegin(); itr1 != itr->MemberEnd(); ++itr1) // objects
+        const std::string sourceitem_path = backupParams.sourceParams[srcparam_iter].path;
+        const int sourceitem_type = backupParams.sourceParams[srcparam_iter].flag;
+
+        for (rapidjson::Value::ConstMemberIterator itr1 = itr->MemberBegin(); itr1 != itr->MemberEnd(); ++itr1) // objects
         {
-            //if(itr1->value.IsString()) printf("STRING Member %s is %s\n", itr1->name.GetString(), itr1->value.GetString());
-            //else if(itr1->value.IsInt64()) printf("NUMBER Member %s is %d\n", itr1->name.GetString(), itr1->value.GetInt());
-            //else if(itr1->value.IsBool()) printf("BOOL Member %s is %s\n", itr1->name.GetString(), itr1->value.GetBool() ? "True" : "False");
-            /*else if(itr1->value.IsArray())
+            const std::string full_dest = backupDir_fullpath + '/' + sourceitem_path.substr(sourceitem_path.find_last_of("/")+1);
+
+            if(strcmp(itr1->name.GetString(),"path") == 0)
             {
-                printf("Array Member %s\n", itr1->name.GetString());
-
-                recursive_arrcopy(itr1);
-            }
-            */
-           
-           //if(itr1->value.IsString())
-           if(!strcmp(itr1->name.GetString(),"path"))
-           {
-                //printf("STRING Member %s is %s\n", itr1->name.GetString(), itr1->value.GetString());
-                fs::path path = fs::current_path();
-                string backupdirpath = path.string();
-                replace(backupdirpath.begin(), backupdirpath.end(), '\\', '/');
-
-                if(backupdirpath.back() != '/') backupdirpath +='/';
-
-                string destination = "";
-
-                string str_store = itr1->value.GetString();
-
-                if(fs::is_regular_file(str_store))
-                {
-                    destination = fs::path(str_store).filename().string();
-                    cout << fs::path(str_store).filename() << endl;
-                    
-                }
-
-                else if(fs::is_directory(str_store))
-                {
-                    destination = fs::path(str_store).string();
-
-                    int backslash;
-                    (destination.back() == '/') ? backslash=2 : backslash=1;
-
-                    for(int index = destination.size() - backslash; index >= 0; --index)
-                    {
-                        if(destination[index] == '/')
-                        {
-                            destination = destination.substr(index);
-                            cout << destination << endl;
-                            break;
-                        }
-
-                        else continue;
-                    }
-                }
+                if(sourceitem_type == 2) fs::copy(sourceitem_path, full_dest);
                 
-                fs::copy(itr1->value.GetString(), backupdirpath+destination,fs::copy_options::recursive);
-           }
+                else fs::create_directory(full_dest);
+            }
+
+            else if(itr1->value.IsArray())
+            {
+                recursive_arrcopy(itr1, sourceitem_type, sourceitem_path, full_dest);
+            }
 
            else continue;
         }

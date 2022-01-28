@@ -1,11 +1,12 @@
 *.out
 *.json
 .vscode
-<<<<<<< HEAD
+needtoadd.txt
 *.exe
 sample-dir
 install
 test_directory
-=======
-*.exe
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
+*_old.cpp
+*_old.hpp
+Info
+rapidjson_stuff

@@ -1,106 +1,85 @@
-<<<<<<< HEAD
 // possibly....
 // clang++ -std=c++17 ../src/*.cpp -o main.exe -I"C:\Program Files\OpenSSL-Win64\include" -L"C:\Program Files\OpenSSL-Win64\lib" -lssl -lcrypto -lstdc++fs
-=======
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
-#include <iostream>
-#include <filesystem>
-#include <map>
-#include <fstream>
-#include <ctime>
-#include <regex>
-<<<<<<< HEAD
-#include <stdio.h>
-
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/filewritestream.h"
 
 #include "tree.hpp"
-#include "sha256_hash.hpp"
-=======
 
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-#include <rapidjson/prettywriter.h>
-#include "rapidjson/filewritestream.h"
+//using namespace rapidjson;
+//using namespace std;
+namespace fs = std::filesystem;
 
-#include "tree.hpp"
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
+std::map<std::string, int> flagMap {{"f", 2}, {"sd", 1}, {"fd", 0}};
 
-using namespace rapidjson;
-using namespace std;
-using namespace filesystem;
-
-map<string, int> flagMap {{"f", 2}, {"sd", 1}, {"fd", 0}};
-
-BackupParams generateBackupParams(string path)
+BackupParams generateBackupParams(std::string path)
 {
-    ifstream ifs(path);
-    IStreamWrapper isw(ifs);
+    std::ifstream ifs(path);
+    rapidjson::IStreamWrapper isw(ifs);
 
-    Document inputJSON;
+    rapidjson::Document inputJSON;
     inputJSON.ParseStream(isw);
 
-    vector<SourceParam> sourceParams;
-<<<<<<< HEAD
+    std::vector<SourceParam> sourceParams;
     for(int i = 0; i < inputJSON["input"].Size(); i++)
-=======
-    int i = 0;
-    int len = inputJSON["input"].Size();
-    for(; i < len; i++)
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
     {
-        string path = inputJSON["input"][i]["path"].GetString();
-        string flag = inputJSON["input"][i]["type"].GetString();
+        std::string path = inputJSON["input"][i]["path"].GetString();
+        std::string flag = inputJSON["input"][i]["type"].GetString();
 
         SourceParam sourceParam {
             .path = path,
             .flag = flagMap[flag]
         };
+
+        // need this for error checking
+        if((sourceParam.flag == 2) && (fs::is_regular_file(sourceParam.path) == 0))
+        {
+            std::cout << "Input JSON Entry " << sourceParam.path << " was declared backup type 'f' and is not a regular file. Exiting..." << std::endl;
+            // need to create an error and force exit from here
+        }
+
+        else if(((sourceParam.flag == 1) || (sourceParam.flag == 0)) && (fs::is_directory(sourceParam.path) == 0))
+        {
+            std::cout << "Input JSON Entry " << sourceParam.path << " was declared backup type 'sd' or 'fd' and is not a directory. Exiting..." << std::endl;
+            // need to create an error and force exit from here
+        }
+
         sourceParams.push_back(sourceParam);
     }
 
-<<<<<<< HEAD
-    string backupLabel(inputJSON["output"]["name"].GetString());
-    string outputPath(inputJSON["output"]["path"].GetString());
+    std::string backupLabel(inputJSON["output"]["name"].GetString());
+    std::string outputPath(inputJSON["output"]["path"].GetString());
+    
+    std::string backupfrequency = inputJSON["output"]["frequency"].GetString();
+
+    int frequency_converted, freq_days, freq_hours, freq_minutes;
+
+    std::size_t first_colon = backupfrequency.find_first_of(':');
+    std::size_t last_colon = backupfrequency.find_last_of(':');
+
+    freq_days = stoi(backupfrequency.substr(0,first_colon))*86400;
+    freq_hours = stoi(backupfrequency.substr(first_colon+1,last_colon))*3600;
+    freq_minutes = stoi(backupfrequency.substr(last_colon+1))*60;
+
+    frequency_converted = freq_days + freq_hours + freq_minutes;
 
     //add a slash (if one wasn't entered) at the end of outpath
     if(outputPath.back() != '/') outputPath += '/'; 
 
     // timestamp generated here!
-    string ts = to_string(time(nullptr));
-=======
-    time_t timestamp = time(nullptr);
-    string backupLabel(inputJSON["output"]["name"].GetString());
-    string outputPath(inputJSON["output"]["path"].GetString());
-
-    outputPath += ("/" + backupLabel + "-" + to_string(timestamp) + ".json"); 
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
+    std::string ts = std::to_string(time(nullptr)); //std::time()
 
     BackupParams b {
         .backupLabel = backupLabel,
         .outputPath = outputPath,
-<<<<<<< HEAD
+        .backupFreq = frequency_converted,
         .ts = ts,
-=======
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
         .sourceParams = sourceParams
     };
 
     return b;
 }
 
-<<<<<<< HEAD
-uintmax_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s, vector<string> &hashes)
+uintmax_t traverseTree(rapidjson::Writer<rapidjson::FileWriteStream> &writer, const SourceParam &s, std::vector<std::string> &hashes)
 {
     // get inode information
-=======
-int64_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s)
-{
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
     struct stat st;
     stat(s.path.c_str(), &st);
 
@@ -114,60 +93,47 @@ int64_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s)
     
     // DECORATE
     writer.Key("path");
-<<<<<<< HEAD
     size_t lastslash = s.path.find_last_of("/"); 
     writer.String(s.path.substr(lastslash+1).c_str()); 
     //writer.String(s.path.c_str());
-=======
-    writer.String(s.path.c_str());
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
 
     writer.Key("timeLastWritten");
     writer.Int64(st.st_mtime);
 
     uintmax_t sizeAcc = st.st_size ? st.st_size : 0;
-<<<<<<< HEAD
     char hash[65];
-=======
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
 
     if ((s.flag == flagMap["fd"] || s.flag == flagMap["sd"]) && S_ISDIR(st.st_mode))
     {
         writer.Key("contents");
         writer.StartArray();
 
-<<<<<<< HEAD
-        vector<string> subdirectory_hashes;
+        std::vector<std::string> subdirectory_hashes;
 
-=======
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
         try {
-            for (directory_entry entry : directory_iterator(s.path))
+            for (fs::directory_entry entry : fs::directory_iterator(s.path))
             {
+                if((s.flag == flagMap["sd"]) && (is_directory(entry))) continue; // sd skips directories in general
+                
                 // replaces path back slashes with forward slashes
-                string path = regex_replace(entry.path().string(), regex("\\\\+"), "/");
+                std::string path = regex_replace(entry.path().string(), std::regex("\\\\+"), "/");
 
                 SourceParam sourceParam {
                     .path = path,
                     .flag = (s.flag == flagMap["fd"] ? flagMap["fd"] : flagMap["f"])
                 };
 
-<<<<<<< HEAD
                 // accumulate size of children
-                if((s.flag == flagMap["sd"]) && (!is_directory(entry))) sizeAcc += traverseTree(writer, sourceParam, subdirectory_hashes); 
-                else continue; 
-=======
-                sizeAcc += traverseTree(writer, sourceParam);
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
+                
+                sizeAcc += traverseTree(writer, sourceParam, subdirectory_hashes);
             }
-        } catch (exception& e) {
-            cout << "Unable to open " << s.path.c_str() << endl;
-            cout << e.what() << endl;
-            cout << "continuing..." << endl << endl;
+        } catch (std::exception& e) {
+            std::cout << "Unable to open " << s.path.c_str() << std::endl;
+            std::cout << e.what() << std::endl;
+            std::cout << "continuing..." << std::endl << std::endl;
         }
 
         writer.EndArray();
-<<<<<<< HEAD
         
         sha256_dir(subdirectory_hashes, false, hash);
 
@@ -190,8 +156,6 @@ int64_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s)
         writer.String(hash);
         
         hashes.push_back(hash); //for the overall hash
-=======
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
     }
 
     writer.Key("size");
@@ -203,34 +167,26 @@ int64_t traverseTree(Writer<FileWriteStream> &writer, const SourceParam &s)
     return sizeAcc;
 } 
 
-<<<<<<< HEAD
-void buildDigest(BackupParams &backupParams, string &backupDigestLocation)
+void buildDigest(BackupParams &backupParams, std::string &backupDigestLocation, std::string &backupDir)
 {
     // individal backup (IB) directory label
-    string backupTimestampedLabel = backupParams.backupLabel + "-" + backupParams.ts;
+    std::string backupTimestampedLabel = backupParams.backupLabel + "-" + backupParams.ts;
 
     // path to IB directory
-    string backupDir = backupParams.outputPath + backupParams.backupLabel + '/' + backupTimestampedLabel;
+    backupDir = backupParams.outputPath + backupParams.backupLabel + '/' + backupTimestampedLabel;
 
     // make the directory ^
-    create_directory(backupDir);
+    fs::create_directory(backupDir);
 
     // path to IB digest file
     backupDigestLocation = backupDir + "/" + backupTimestampedLabel + ".json";
-    cout << "Writing digest to: " << backupDigestLocation << endl;
+    std::cout << "Writing digest to: " << backupDigestLocation << std::endl;
 
     if(FILE* fp = fopen(backupDigestLocation.c_str(), "w+"))
-=======
-void buildDigest(BackupParams &backupParams)
-{
-    cout << "Writing digest to: " << backupParams.outputPath << endl;
-
-    if(FILE* fp = fopen(backupParams.outputPath.c_str(), "w+"))
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
     {
         char writeBuf[65536];
-        FileWriteStream outStream(fp, writeBuf, sizeof(writeBuf));
-        Writer<FileWriteStream> fsWriter(outStream);
+        rapidjson::FileWriteStream outStream(fp, writeBuf, sizeof(writeBuf));
+        rapidjson::Writer<rapidjson::FileWriteStream> fsWriter(outStream);
 
         fsWriter.StartObject();
         fsWriter.Key("name");
@@ -238,8 +194,7 @@ void buildDigest(BackupParams &backupParams)
         fsWriter.Key("files");
         fsWriter.StartArray();
 
-<<<<<<< HEAD
-        vector<string> hashes;
+        std::vector<std::string> hashes;
         uintmax_t totalbackupsize = 0;
 
         for (const SourceParam& s : backupParams.sourceParams)
@@ -263,18 +218,5 @@ void buildDigest(BackupParams &backupParams)
         fclose(fp);
     }
 
-    else throw runtime_error("Error opening digest file.");
-=======
-        for (const SourceParam& s : backupParams.sourceParams)
-        {
-            traverseTree(fsWriter, s);
-        }
-
-        fsWriter.EndArray();
-        fsWriter.EndObject();
-        
-    } else {
-        throw runtime_error("Error opening digest file.");
-    }
->>>>>>> ee33bb0c3328ae86ea9367ff5110360d210a1207
+    else throw std::runtime_error("Error opening digest file.");
 }

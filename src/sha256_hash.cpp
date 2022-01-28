@@ -1,11 +1,11 @@
-#include <openssl/sha.h>
-#include <filesystem>
-#include <stdio.h>
+#include "sha256_hash.hpp"
 
-using namespace std;
-using namespace filesystem;
+//using namespace std;
+//using namespace filesystem;
 
-int sha256_file(string path, char output[65])
+namespace fs = std::filesystem;
+
+int sha256_file(std::string path, char output[65])
 {
     FILE* fp = fopen(path.c_str(), "rb");
     if(!fp) return -1;
@@ -14,7 +14,7 @@ int sha256_file(string path, char output[65])
     SHA256_Init(&sha256_struct); //initializes an instance of sha_ctx structure
 
     const int bufSize = 32768;
-    vector<char> buff(bufSize);
+    std::vector<char> buff(bufSize);
 
     int bytesRead = 0; // total number of bytes read from the current fread
 
@@ -37,13 +37,13 @@ int sha256_file(string path, char output[65])
     return 0;
 }
 
-void sha256_dir(vector<string> directory_hashes, bool del_dirhash_file, char hash_final[65])
+void sha256_dir(std::vector<std::string> directory_hashes, bool del_dirhash_file, char hash_final[65])
 {
     //open and overwrite the contents of the "dirhash.txt"
     FILE* getdirhash = fopen("dirhash.txt", "w");
 
     //loop through the hashes of children
-    for(vector<string>::iterator iter = directory_hashes.begin(); iter < directory_hashes.end(); iter++)
+    for(std::vector<std::string>::iterator iter = directory_hashes.begin(); iter < directory_hashes.end(); iter++)
     {
         //send hash info from vector to file, then hit return
         fputs((*iter).c_str(),getdirhash);

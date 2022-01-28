@@ -2,17 +2,14 @@
 #define FILECOPY
 
 #include <filesystem>
+#include <stdio.h>
 #include <iostream>
 
-#include "rapidjson\document.h"
-#include "rapidjson\filereadstream.h"
- 
-using namespace std;
-using namespace rapidjson;
-using namespace filesystem;
+#include "tree.hpp" //for the BackupParams struct
 
-//void recursive_arrcopy(Value::ConstMemberIterator itr_in);
+#include "rapidjson/document.h"
+#include "rapidjson/filereadstream.h"
 
-void filecopy(string jsonname);
+void filecopy(BackupParams backup_location, std::string json_location, std::string backupDir_fullpath);
 
 #endif
