@@ -1,7 +1,8 @@
 {
 	"output": {
 		"name": "Name_of_Output_Digest",
-		"path": "/path/to/output/"
+		"path": "/path/to/output/",
+		"frequency": "day:min:sec"
 	},
 	"input": [
 		{
