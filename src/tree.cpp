@@ -3,8 +3,6 @@
 
 #include "tree.hpp"
 
-//using namespace rapidjson;
-//using namespace std;
 namespace fs = std::filesystem;
 
 std::map<std::string, int> flagMap {{"f", 2}, {"sd", 1}, {"fd", 0}};

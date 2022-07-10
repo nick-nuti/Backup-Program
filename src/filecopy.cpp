@@ -1,6 +1,6 @@
 #include "filecopy.hpp"
 
-#include <pthread.h>
+#include <thread>
 
 namespace fs = std::filesystem;
 

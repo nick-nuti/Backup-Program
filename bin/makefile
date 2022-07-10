@@ -14,8 +14,14 @@ $(SRC_DIR)/main.cpp \
 $(SRC_DIR)/sha256_hash.cpp \
 $(SRC_DIR)/tree.cpp \
 $(SRC_DIR)/config_app.cpp \
+$(SRC_DIR)/debug_logger.cpp \
 
-all: os_detect build_app
+all: release
+
+debug: CFLAGS+=-DDEBUG_VAR
+debug: release
+
+release: os_detect build_app_dbg
 
 os_detect:
 
@@ -53,6 +59,20 @@ else ifeq ($(OSS),LIN)
 else ifeq ($(OSS),OSX)
 	@echo "OSX"
 	$(CC) -std=$(CXX) $(CXX_SRC) -o main $(CINCLUDE) $(CLIB) $(CFLAGS)
+else
+	@echo "Unknown OS"
+endif
+
+build_app_dbg:
+ifeq ($(OSS),WIN)
+	@echo "Windows"
+	$(CC) -std=$(CXX) $(CXX_SRC) -o main_debug.exe $(CINCLUDE) $(CLIB) $(CFLAGS)
+else ifeq ($(OSS),LIN)
+	@echo "Linux"
+	$(CC) -std=$(CXX) $(CXX_SRC) -o main_debug $(CINCLUDE) $(CLIB) $(CFLAGS)
+else ifeq ($(OSS),OSX)
+	@echo "OSX"
+	$(CC) -std=$(CXX) $(CXX_SRC) -o main_debug $(CINCLUDE) $(CLIB) $(CFLAGS)
 else
 	@echo "Unknown OS"
 endif

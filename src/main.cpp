@@ -1,5 +1,3 @@
-// clang++ -std=c++17 ./*.cpp -o ./main.out -lstdc++fs
-
 #include <filesystem>
 #include <iostream>
 #include <chrono>
@@ -11,33 +9,38 @@
 #include "sha256_hash.hpp"
 #include "config_app.hpp"
 
+#include "debug_logger.hpp"
+
 namespace fs = std::filesystem;
 
 int main(int argc, char **argv) 
 {  
+    if(debug_logger::debug_thread == 1) std::cout << "DEBUG THREAD ACTIVE\n";
+
     auto start_time = std::chrono::steady_clock::now();
 
-    config_app::os_config(); //create config dir + file if they don't exist
+//create config dir + file if they don't exist
+    config_app::os_config(); 
     std::string inputJSONPath;
 
     if(argv[1] != NULL)
     {
         inputJSONPath = argv[1];
-        std::cout << "Building digest from: " << inputJSONPath << std::endl;
+        debug_logger::print("Building digest from: %v\n",inputJSONPath);
     }
 
-    //if run without input arg, check available backups from config
+//if run without input arg, check available backups from config
     else inputJSONPath = config_app::config_digest();
 
     if(inputJSONPath.empty())
     {
-        std::cout << "No backup path selected. Exiting..." << std::endl;
+        debug_logger::print("No backup path selected. Exiting...\n");
         return 0;
     }
 
     BackupParams backupParams = generateBackupParams(inputJSONPath);
 
-    // create named backup parent directory (holds invidual backups) 
+// create named backup parent directory (holds invidual backups) 
     if(!fs::exists(backupParams.outputPath + backupParams.backupLabel))    
     {
         fs::create_directories(backupParams.outputPath + backupParams.backupLabel);
@@ -48,14 +51,13 @@ int main(int argc, char **argv)
 
     buildDigest(backupParams, backupDigestLocation, backupDir);
 
-    // update config should be right here
+// update config should be right here
     config_app::update_config(backupDir, backupParams.backupFreq);
 
     //filecopy(backupParams, backupDigestLocation, backupDir);
 
     auto end_time = std::chrono::steady_clock::now();
 
-    std::cout << "Time Elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time-start_time).count() << " ms" << std::endl;
-
+    debug_logger::print("Time Elapsed: %v ms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end_time-start_time).count());
     return 0;
 }
