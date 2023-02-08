@@ -17,8 +17,10 @@ void config_app::os_config()
         if(checkadmin() == false) std::cout << "Please re-run as root" << std::endl;
         else
         {
+            // create directory in /var/lib/ if it doesn't exist
             fs::create_directory(config_location);
 
+            // creates files /var/lib/config.json
             if(FILE * fp = fopen(config.c_str(),"w+"))
             {
                 fputs("{\"Backups\":[]}", fp);

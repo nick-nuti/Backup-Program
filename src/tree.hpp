@@ -35,6 +35,6 @@ BackupParams generateBackupParams(std::string path);
 
 void buildDigest(BackupParams &backupParams, std::string &backupDigestLocation, std::string &backupDir);
 
-uintmax_t traverseTree(rapidjson::Writer<rapidjson::FileWriteStream> &writer, const SourceParam &s, std::vector<std::string> &hashes);
+uintmax_t traverseTree(rapidjson::Writer<rapidjson::FileWriteStream> &writer, const SourceParam &s, std::vector<std::string> &hashes,const bool recursive_run);
 
 #endif

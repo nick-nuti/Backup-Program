@@ -91,9 +91,24 @@ uintmax_t traverseTree(rapidjson::Writer<rapidjson::FileWriteStream> &writer, co
     
     // DECORATE
     writer.Key("path");
-    size_t lastslash = s.path.find_last_of("/"); 
-    writer.String(s.path.substr(lastslash+1).c_str()); 
-    //writer.String(s.path.c_str());
+
+    // for files we want everything after the last '/'
+    // for first directory, we want everything
+        // for subdirectory, we want everything after the second to last '/'
+
+    size_t lastslash;
+    std::string str_path = s.path; //s.path cannot be modified due to it's const nature
+
+    if(s.path.back() == '/')
+    {
+        str_path.pop_back();
+        lastslash = str_path.find_last_of("/");
+    }
+
+    else lastslash = str_path.find_last_of("/");
+
+    //std::cout << "s.path = " << str_path << '\n';
+    writer.String(str_path.substr(lastslash+1).c_str());
 
     writer.Key("timeLastWritten");
     writer.Int64(st.st_mtime);
@@ -188,7 +203,7 @@ void buildDigest(BackupParams &backupParams, std::string &backupDigestLocation, 
 
         fsWriter.StartObject();
         fsWriter.Key("name");
-        fsWriter.String(backupParams.backupLabel.c_str());
+        fsWriter.String(backupTimestampedLabel.c_str());
         fsWriter.Key("files");
         fsWriter.StartArray();
 

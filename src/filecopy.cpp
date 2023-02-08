@@ -1,7 +1,5 @@
 #include "filecopy.hpp"
 
-#include <thread>
-
 namespace fs = std::filesystem;
 
 void recursive_arrcopy(rapidjson::Value::ConstMemberIterator itr1, const int sourceitem_type, const std::string sourceitem_path, const std::string sub_dest_path)

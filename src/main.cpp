@@ -8,14 +8,13 @@
 #include "filecopy.hpp"
 #include "sha256_hash.hpp"
 #include "config_app.hpp"
-
 #include "debug_logger.hpp"
 
 namespace fs = std::filesystem;
 
 int main(int argc, char **argv) 
 {  
-    if(debug_logger::debug_thread == 1) std::cout << "DEBUG THREAD ACTIVE\n";
+    debug_logger::debuglogger.print("this is it %v", "shit\n");
 
     auto start_time = std::chrono::steady_clock::now();
 
@@ -26,7 +25,8 @@ int main(int argc, char **argv)
     if(argv[1] != NULL)
     {
         inputJSONPath = argv[1];
-        debug_logger::print("Building digest from: %v\n",inputJSONPath);
+        std::cout << "Building digest from: " << inputJSONPath << std::endl;
+        //debug_logger::print("Building digest from: %v\n",inputJSONPath);
     }
 
 //if run without input arg, check available backups from config
@@ -34,7 +34,8 @@ int main(int argc, char **argv)
 
     if(inputJSONPath.empty())
     {
-        debug_logger::print("No backup path selected. Exiting...\n");
+        std::cout << "No backup path selected. Exiting..." << std::endl;
+        //debug_logger::print("No backup path selected. Exiting...\n");
         return 0;
     }
 
@@ -58,6 +59,8 @@ int main(int argc, char **argv)
 
     auto end_time = std::chrono::steady_clock::now();
 
-    debug_logger::print("Time Elapsed: %v ms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end_time-start_time).count());
+    std::cout << "Time Elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time-start_time).count() << " ms" << std::endl;
+    //debug_logger::print("Time Elapsed: %v ms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end_time-start_time).count());
+
     return 0;
 }
